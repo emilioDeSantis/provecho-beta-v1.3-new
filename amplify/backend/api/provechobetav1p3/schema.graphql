@@ -1,0 +1,171 @@
+enum PostType {
+    ORIGINAL
+    REMAKE
+}
+
+type Step {
+    step: String!
+}
+
+type PostIngredient {
+    quantity: String!
+    type: String!
+}
+
+type Chef
+    @model 
+    @key(name: "byUsername", fields: ["username"])
+    @key(name: "byNFollowers", fields: ["n_followers"])
+    {
+    id: ID!
+    username: String!
+    image: String!
+    biography: String!
+    n_followers: Int
+    n_following: Int
+    n_remakes: Int
+    followers: [Follow] @connection(keyName: "byFollowing", fields: ["id"]) 
+    following: [Follow] @connection(keyName: "byFollowedby", fields: ["id"])
+    # stashes: [Stash] @connection(keyName: "byChef", fields: ["id"])
+    # tips: [Tip] @connection(keyName: "byChef", fields: ["id"])
+    # likes: [Like] @connection(keyName: "byChef", fields: ["id"])
+    # comments: [Comment] @connection(keyName: "byChef", fields: ["id"])
+    recipes: [Recipe] @connection(keyName: "byChef", fields: ["id"])
+    posts: [Post] @connection(keyName: "byChef", fields: ["id"])
+}
+
+type Recipe 
+    @model 
+    @key(name: "byChef", fields: ["chefID"])
+    @key(name: "byPost", fields: ["postID"])
+    @key(name: "byTitle", fields: ["title"])
+    {
+    id: ID!
+    title: String!
+    image: String!
+    serves: Int!
+    cook_time: Int!
+    procedure: [Step]
+    n_tips: Int
+    chefID: ID!
+    postID: ID
+    # tips: [Tip] @connection(keyName: "byRecipe", fields: ["id"])
+    chef: Chef! @connection
+}
+
+type Post 
+    @model
+    @key(name: "byChef", fields: ["chefID"]) 
+    @key(name: "byDate", fields: ["createdAt"])     
+    @key(name: "byType", fields: ["type"])    
+    @key(name: "byRating", fields: ["rating"])    
+    {
+    id: ID!
+    title: String!
+    caption: String!
+    image: String!
+    type: PostType!
+    createdAt: AWSDateTime!
+    n_likes: Int
+    n_comments: Int
+    n_tips: Int
+    rating: Int
+    chefID: ID!
+    hashtags: [String]
+    ingredientList: [String]
+    ingredients: [PostIngredient]
+    # tips: [Tip] @connection(keyName: "byPost", fields: ["id"])
+    # stashes: [Stash] @connection(keyName: "byRecipe", fields: ["id"])
+    # likes: [Like] @connection(keyName: "byPost", fields: ["id"])
+    # comments: [Comment] @connection(keyName: "byPost", fields: ["id"])
+    chef: Chef! @connection
+    recipe: Recipe @connection
+}
+
+type Follow 
+    @model 
+    @key(name: "byFollowing", fields: ["followingID", "followerID"])
+    @key(name: "byFollowedby", fields: ["followerID", "followingID"])
+    {
+    id: ID!
+    followingID: ID!
+    followerID: ID!
+}
+
+type Stash 
+    @model 
+    @key(name: "byChef", fields: ["chefID"])
+    @key(name: "byPost", fields: ["postID"])
+    @key(name: "byDate", fields: ["createdAt"])  
+    {
+    id: ID!
+    createdAt: AWSDateTime!
+    chefID: ID!
+    postID: ID!
+    chef: Chef! @connection
+    post: Post! @connection
+}
+
+type Tip 
+    @model 
+    @key(name: "byChef", fields: ["chefID"])
+    @key(name: "byRecipe", fields: ["recipeID"])
+    @key(name: "byPost", fields: ["postID"])
+    @key(name: "byDate", fields: ["createdAt"])  
+    {
+    id: ID!
+    createdAt: AWSDateTime!
+    text: String!
+    chefID: ID!
+    recipeID: ID!
+    postID: ID!
+    chef: Chef! @connection
+    recipe: Recipe! @connection
+    post: Post! @connection
+    remake: Post! @connection
+}
+
+type Like 
+    @model 
+    @key(name: "byChef", fields: ["chefID"])
+    @key(name: "byPost", fields: ["postID"])
+    @key(name: "byDate", fields: ["createdAt"])  
+    {
+    id: ID!
+    createdAt: AWSDateTime!
+    chefID: ID!
+    postID: ID!
+    chef: Chef! @connection
+    post: Post! @connection
+}
+
+type Comment 
+    @model 
+    @key(name: "byChef", fields: ["chefID"])
+    @key(name: "byPost", fields: ["postID"])
+    @key(name: "byDate", fields: ["createdAt"])  
+    {
+    id: ID!
+    createdAt: AWSDateTime!
+    text: String!
+    chefID: ID!
+    postID: ID!
+    chef: Chef! @connection
+    post: Post! @connection
+}
+
+type Hashtag 
+    @model
+    @key(name: "byName", fields: ["name"]) 
+    {
+    id: ID!
+    name: String!
+}
+
+type Ingredient 
+    @model
+    @key(name: "byName", fields: ["name"]) 
+    {
+    id: ID!
+    name: String!
+}
